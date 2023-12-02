@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, validator
 
 
 class UsersSchema(BaseModel):
@@ -14,10 +14,16 @@ class UsersViewSchema(UsersSchema):
 
 class ReposSchema(BaseModel):
     uri: str = Field(..., description='URI Repo')
+    api_uri: str = Field(..., description='API URI Repo')
     owner: str = Field(..., description='Owner')
     repo_name: str = Field(..., description='Repo name')
     release: str = Field(..., description='Release tag')
     release_date: dt = Field(..., description='Release date')
+
+    @field_validator('release_date', mode='before')
+    @classmethod
+    def validate_release_date(cls, value):
+        return dt.timestamp(value)
 
 
 class ReposViewSchema(ReposSchema):

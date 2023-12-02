@@ -4,6 +4,8 @@ import click
 import asyncio
 from starlette import status
 from datetime import datetime
+import requests
+import json
 
 from typing import List, Dict
 from getlogger import get_logger
@@ -56,24 +58,33 @@ def create_app():
     @app.post('/add_repos',
               status_code=status.HTTP_201_CREATED)
     async def add_repos(request: Request, data: Dict[str, int | List[List[str]]]):
-        print(data)
+        token = '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'
         sm = request.app.session_maker
         user_id = data['user_id']
         for repository in data['repos']:
             owner = repository[0]
             repo_name = repository[1]
+            uri = f'https://github.com/{owner}/{repo_name}'
+            api_uri = f'https://api.github.com/repos/{owner}/{repo_name}/releases/latest'
 
+            response = requests.get(api_uri,
+                                    headers={'Authorization': f'token:{token}',
+                                             'X-GitHub-Api-Version': '2022-11-28'})
+            response = json.loads(response.text)
+            release = response['tag_name']
+            release_date = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+            print(type(release_date))
+
+            repo_to_load = {'uri': uri,
+                            'api_uri': api_uri,
+                            'owner': owner,
+                            'repo_name': repo_name,
+                            'release': release,
+                            'release_date': release_date}
 
             async with sm.begin() as session:
-                await UsersQueryset.create(session, **data.model_dump())
-
-        id: int
-        uri: str
-        api_uri: str
-        owner: str
-        repo_name: str
-        release: str
-        release_date: datetime
+                repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
+                await ReposQueryset.create(session, **repo_to_load_as_schema.model_dump())
 
     @app.post('/delete_subscriptions/{user}/{repos}')
     async def delete_repos(request: Request):
