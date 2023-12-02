@@ -48,6 +48,8 @@ class Repos(BaseModel):
     __tablename__ = "repos"
     __table_args__ = {'comment': 'Таблица отслеживаемых библиотек.'}
 
+
+    id = Column(Integer(), nullable=False, primary_key=True, comment='ID в базе данных')
     uri = Column(Text(), nullable=False, primary_key=True, comment='Ссылка на репозиторий')
     api_uri = Column(Text(), nullable=False, comment='Ссылка на репозиторий')
     owner = Column(Text(), nullable=False, comment='Владелец репозитория')

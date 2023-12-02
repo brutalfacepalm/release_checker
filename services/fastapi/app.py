@@ -3,8 +3,9 @@ import uvicorn
 import click
 import asyncio
 from starlette import status
+from datetime import datetime
 
-from typing import List
+from typing import List, Dict
 from getlogger import get_logger
 from database import Base, engine
 from database import sm as session_maker
@@ -48,14 +49,31 @@ def create_app():
     @app.post('/add_user',
               status_code=status.HTTP_201_CREATED)
     async def add_user(request: Request, data: UsersSchema):
-        print(data)
         sm = request.app.session_maker
         async with sm.begin() as session:
             await UsersQueryset.create(session, **data.model_dump())
 
-    @app.post('/add_repos/{user}/{repos}')
-    async def add_repos(request: Request):
-        pass
+    @app.post('/add_repos',
+              status_code=status.HTTP_201_CREATED)
+    async def add_repos(request: Request, data: Dict[str, int | List[List[str]]]):
+        print(data)
+        sm = request.app.session_maker
+        user_id = data['user_id']
+        for repository in data['repos']:
+            owner = repository[0]
+            repo_name = repository[1]
+
+
+            async with sm.begin() as session:
+                await UsersQueryset.create(session, **data.model_dump())
+
+        id: int
+        uri: str
+        api_uri: str
+        owner: str
+        repo_name: str
+        release: str
+        release_date: datetime
 
     @app.post('/delete_subscriptions/{user}/{repos}')
     async def delete_repos(request: Request):

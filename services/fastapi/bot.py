@@ -179,10 +179,16 @@ def create_bot():
         elif len(parse_libs) == 1:
             await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) добавлена в список отслеживания')
         elif len(parse_libs) > 1:
-            libs = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
-            await update.message.reply_text(f'Библиотеки {libs} добавлены к отслеживанию')
+            multi_libs = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
+            await update.message.reply_text(f'Библиотеки {multi_libs} добавлены к отслеживанию')
         await add_subscription(update, context)
-        return 2
+
+        send_repos = {'user_id': update.message.from_user.id,
+                      'repos': libs}
+        uri = 'http://0.0.0.0:8880/add_repos'
+        requests.post(uri, json=send_repos)
+
+        return 3
 
     async def delete_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text('ВЫДАТЬ СПИСОК ПОДПИСОК')
@@ -303,8 +309,3 @@ def create_bot():
 
 if __name__ == '__main__':
     create_bot()
-
-# application_telegram.bot(bot)
-
-
-
