@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:16.1
+    restart: always
+    container_name: database
+    environment:
+      - POSTGRES_DATABASES=fastapi
+      - POSTGRES_USER=fastapi
+      - POSTGRES_PASSWORD=fastapi
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./services/database:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      fastapi:
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "fastapi@test.com"
+      PGADMIN_DEFAULT_PASSWORD: "fastapi"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      fastapi:
+
+#  fastapi:
+#    build:
+#      context: ./services/fastapi
+#      dockerfile: ./Dockerfile
+#    container_name: fastapi
+#    command: python app.py
+#    env_file:
+#      .env.dev
+#    volumes:
+#      - ./services/fastapi:/fastapi
+#    ports:
+#      - "8880:8880"
+#    depends_on:
+#      - database
+#    networks:
+#      fastapi:
+
+#  telegram_bot:
+#    build:
+#      context: ./services/fastapi
+#      dockerfile: ./Dockerfile
+#    restart: always
+#    container_name: telegram_bot
+#    command: python bot.py
+#    env_file:
+#      .env.dev
+#    volumes:
+#      - ./services/fastapi:/fastapi
+#    depends_on:
+#      - database
+#    networks:
+#      fastapi:
+
+networks:
+  fastapi:
+
+volumes:
+  pgadmin:
