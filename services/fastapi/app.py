@@ -41,11 +41,11 @@ def create_app():
     logger.info('Application FastAPI was created')
 
     @app.get('/get_releases/{user}', response_model=List[NewReleasesSchema])
-    async def get_releases(request: Request):
+    async def get_releases(request: Request, user: int):
         pass
 
     @app.get('/get_subscriptions/{user}', response_model=List[SubscriptionsByUserSchema])
-    async def get_subscriptions(request: Request):
+    async def get_subscriptions(request: Request, user: int):
         pass
 
     @app.post('/add_user',
@@ -84,19 +84,19 @@ def create_app():
 
             async with sm.begin() as session:
                 repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
-                id_repo = await ReposQueryset.create(session, repo_to_load_as_schema.model_dump())
+                id_repo, is_created = await ReposQueryset.create(session, repo_to_load_as_schema.model_dump())
 
             subscriptions['repo_id'] = id_repo
             async with sm.begin() as session:
                 subscriptions_to_load_as_schema = SubscriptionsSchema.model_validate(subscriptions)
                 await SubscriptionsQueryset.create(session, subscriptions_to_load_as_schema.model_dump())
 
-    @app.post('/delete_subscriptions/{user}/{repos}')
-    async def delete_repos(request: Request):
+    @app.post('/delete_subscriptions')
+    async def delete_repos(request: Request, data: Dict[str, int | List[int]]):
         pass
 
-    @app.post('/delete_all_subscriptions/{user}')
-    async def delete_all_repos(request: Request):
+    @app.post('/delete_all_subscriptions')
+    async def delete_all_repos(request: Request, user: Dict[str, int]):
         pass
 
     return app

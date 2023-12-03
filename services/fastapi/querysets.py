@@ -23,9 +23,9 @@ class ReposQueryset:
             created = cls.model(**data_dict)
             await session.merge(created)
             await session.flush([created])
-            return created.id
+            return created.id, True
         else:
-            return to_update.id
+            return to_update.id, False
 
 
 class SubscriptionsQueryset:
