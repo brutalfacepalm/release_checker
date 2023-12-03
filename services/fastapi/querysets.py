@@ -25,6 +25,7 @@ class ReposQueryset:
             await session.flush([created])
             return created.id, True
         else:
+            ## TO DO CHECK NEW RELEASES AND UPDATE NOTIFICATIONS TABLE
             return to_update.id, False
 
 
@@ -40,6 +41,11 @@ class SubscriptionsQueryset:
             await session.merge(created)
             await session.flush([created])
             return created.id
+
+    @classmethod
+    async def get_repos_by_user(cls, session, user):
+        pass
+
 
 class NotificationsQueryset:
     model = Notifications
