@@ -69,6 +69,10 @@ class SubscriptionsByUserSchema(BaseModel):
     release: str = Field(..., description='release number')
     release_date: datetime = Field(..., description='release datetime')
 
+    @field_validator('release_date', mode='after')
+    @classmethod
+    def validate_release_date(cls, value):
+        return datetime.strftime(value, '%Y.%m.%d %H:%M:%S', )
 
 class SubscriptionsByUserViewSchema(SubscriptionsByUserSchema):
     id: int = Field(..., description='ID')

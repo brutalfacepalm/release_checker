@@ -46,7 +46,22 @@ def create_app():
 
     @app.get('/get_subscriptions/{user}', response_model=List[SubscriptionsByUserSchema])
     async def get_subscriptions(request: Request, user: int):
-        pass
+        sm = request.app.session_maker
+        response = []
+        async with sm.begin() as session:
+            res = await SubscriptionsQueryset.get_repos_by_user(session, user)
+            for by_repo in res:
+                one_repo = {'user_id': by_repo[0],
+                            'owner': by_repo[1],
+                            'repo_name': by_repo[2],
+                            'repo_uri': by_repo[3],
+                            'release': by_repo[4],
+                            'release_date': by_repo[5]}
+                repo = SubscriptionsByUserSchema.model_validate(one_repo)
+                response.append(repo)
+        return response
+
+
 
     @app.post('/add_user',
               status_code=status.HTTP_201_CREATED)

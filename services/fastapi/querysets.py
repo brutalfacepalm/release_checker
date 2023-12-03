@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from models import Users, Repos, Subscriptions, Notifications
 
@@ -44,7 +44,13 @@ class SubscriptionsQueryset:
 
     @classmethod
     async def get_repos_by_user(cls, session, user):
-        pass
+        query = text(f"""SELECT s.user_id, r.owner, r.repo_name, 
+        r.uri, r.release, r.release_date FROM subscriptions AS s
+        JOIN repos AS r ON s.repo_id=r.id WHERE s.user_id={user} 
+        ORDER BY (r.repo_name, r.owner) ASC;""")
+        repos = await session.execute(query)
+        return repos
+
 
 
 class NotificationsQueryset:

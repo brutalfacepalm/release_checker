@@ -93,6 +93,12 @@ def create_bot():
 
     async def list_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ## TO DO SELECT USER-RELEASES FROM TABLE
+        user = update.message.from_user.id
+        uri = f'http://0.0.0.0:8880/get_subscriptions/{user}'
+        response = requests.get(uri)
+        print(response)
+        print(type(response))
+
         await update.message.reply_text('Твой список подписок: СПИСОК ПОДПИСОК')
         await manage_subscription(update, context)
         return 1
