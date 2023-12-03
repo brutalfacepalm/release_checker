@@ -61,6 +61,7 @@ def create_app():
         token = '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'
         sm = request.app.session_maker
         user_id = data['user_id']
+        subscriptions = {'user_id': user_id}
         for repository in data['repos']:
             owner = repository[0]
             repo_name = repository[1]
@@ -72,8 +73,7 @@ def create_app():
                                              'X-GitHub-Api-Version': '2022-11-28'})
             response = json.loads(response.text)
             release = response['tag_name']
-            release_date = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-            print(type(release_date))
+            release_date = response['created_at']
 
             repo_to_load = {'uri': uri,
                             'api_uri': api_uri,
@@ -84,7 +84,12 @@ def create_app():
 
             async with sm.begin() as session:
                 repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
-                await ReposQueryset.create(session, **repo_to_load_as_schema.model_dump())
+                id_repo = await ReposQueryset.create(session, repo_to_load_as_schema.model_dump())
+
+            subscriptions['repo_id'] = id_repo
+            async with sm.begin() as session:
+                subscriptions_to_load_as_schema = SubscriptionsSchema.model_validate(subscriptions)
+                await SubscriptionsQueryset.create(session, subscriptions_to_load_as_schema.model_dump())
 
     @app.post('/delete_subscriptions/{user}/{repos}')
     async def delete_repos(request: Request):

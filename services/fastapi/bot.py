@@ -113,7 +113,7 @@ def create_bot():
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=f"Добавление подписок: ОБЩАЯ ИНСТРУКЦИЯ ПО ДОБАВЛЕНИЮ",
                                        reply_markup=reply_markup)
-        return 2
+        return 3
 
     async def delete_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
@@ -241,38 +241,39 @@ def create_bot():
         # application_telegram.add_handler(MessageHandler(Regex('^(В начало)$'), start_communication))
         start_conv = ConversationHandler(entry_points=[CommandHandler('start', welcome),
                                                        MessageHandler(Regex('^(В начало)$'), start_communication)],
-                                         states={0: [MessageHandler(Regex('^(Проверить новые релизы)$'), check_releases),
+                                         states={0: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('^(Проверить новые релизы)$'), check_releases),
                                                      MessageHandler(Regex('^(Управление моими подписками)$'), manage_subscription),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)],
 
-                                                 1: [MessageHandler(Regex('^(Показать список подписок)$'), list_subscription),
+                                                 1: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('^(Показать список подписок)$'), list_subscription),
                                                      MessageHandler(Regex('^(Добавить подписки)$'), add_subscription),
                                                      MessageHandler(Regex('^(Удалить подписки)$'), delete_subscription),
                                                      MessageHandler(Regex('^(Подписаться на уведомления)$'), set_time_notification),
                                                      MessageHandler(Regex('^(Отписаться от уведомлений)$'), delete_notification),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)],
 
-                                                 2: [MessageHandler(Regex('^(Добавить одну)$'), add_one),
-                                                     MessageHandler(Regex('^(Добавить списком)$'), add_list),
-                                                     MessageHandler(Regex('^(Назад)$'), manage_subscription),
-                                                     MessageHandler(Regex('^(В начало)$'), start_communication)],
-
-                                                 3: [MessageHandler(Regex('https:\/\/github\.com\/(\w+)\/(\w+)'), add_repos),
+                                                 3: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('https:\/\/github\.com\/(\w+)\/(\w+)'), add_repos),
                                                      MessageHandler(Regex('^(Добавить одну)$'), add_one),
                                                      MessageHandler(Regex('^(Добавить списком)$'), add_list),
                                                      MessageHandler(Regex('^(Назад)$'), manage_subscription),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)],
 
-                                                 4: [MessageHandler(Regex('^(Удалить списком)$'), delete_list),
+                                                 4: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('^(Удалить списком)$'), delete_list),
                                                      MessageHandler(Regex('^(Удалить все)$'), delete_all),
                                                      MessageHandler(Regex('^(Назад)$'), manage_subscription),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)],
 
-                                                 5: [MessageHandler(Regex('(\d)'), delete_repos),
+                                                 5: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('(\d)'), delete_repos),
                                                      MessageHandler(Regex('^(Назад)$'), delete_subscription),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)],
 
-                                                 6: [MessageHandler(Regex('^(([0,1]?\d|[2][0-3]):([0-5]\d))$'), set_notification),
+                                                 6: [CommandHandler('start', start_communication),
+                                                     MessageHandler(Regex('^(([0,1]?\d|[2][0-3]):([0-5]\d))$'), set_notification),
                                                      MessageHandler(Regex('^(Назад)$'), manage_subscription),
                                                      MessageHandler(Regex('^(В начало)$'), start_communication)]},
                                          fallbacks=[CommandHandler('cancel', cancel)])

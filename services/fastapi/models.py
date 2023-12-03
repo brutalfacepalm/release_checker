@@ -1,6 +1,7 @@
 from datetime import datetime as dt
 from sqlalchemy import Column, BigInteger, Text, DateTime, Integer
 from sqlalchemy.orm.collections import InstrumentedList
+from sqlalchemy import func
 from database import Base
 
 
@@ -48,8 +49,7 @@ class Repos(BaseModel):
     __tablename__ = "repos"
     __table_args__ = {'comment': 'Таблица отслеживаемых библиотек.'}
 
-
-    id = Column(Integer(), nullable=False, primary_key=True, comment='ID в базе данных')
+    id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
     uri = Column(Text(), nullable=False, primary_key=True, comment='Ссылка на репозиторий')
     api_uri = Column(Text(), nullable=False, comment='Ссылка на репозиторий')
     owner = Column(Text(), nullable=False, comment='Владелец репозитория')
@@ -66,9 +66,8 @@ class Subscriptions(BaseModel):
     __table_args__ = {'comment': 'Таблица подписок.'}
 
     id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
-    user_id = Column(Integer(), nullable=False, comment='ID пользователя')
-    repo_id = Column(Integer(), nullable=False, comment='ID репозитория')
-    repo_number = Column(Integer(), nullable=False, comment='№ репозитория пользователя')
+    user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
+    repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')
 
 
 class Notifications(BaseModel):
@@ -79,6 +78,5 @@ class Notifications(BaseModel):
     __table_args__ = {'comment': 'Таблица актуальных обновлений библиотек.'}
 
     id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
-    user_id = Column(Integer(), nullable=False, comment='ID пользователя')
-    repo_id = Column(Integer(), nullable=False, comment='ID репозитория')
-    repo_number = Column(Integer(), nullable=False, comment='№ репозитория пользователя')
+    user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
+    repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')
