@@ -65,7 +65,7 @@ class Subscriptions(BaseModel):
     __tablename__ = "subscriptions"
     __table_args__ = {'comment': 'Таблица подписок.'}
 
-    id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
+    # id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
     user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
     repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')
 
@@ -77,6 +77,6 @@ class Notifications(BaseModel):
     __tablename__ = "notifications"
     __table_args__ = {'comment': 'Таблица актуальных обновлений библиотек.'}
 
-    id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
+    # id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
     user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
     repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')

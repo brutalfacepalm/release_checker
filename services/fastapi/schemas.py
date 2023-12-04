@@ -18,7 +18,7 @@ class ReposSchema(BaseModel):
     owner: str = Field(..., description='Owner')
     repo_name: str = Field(..., description='Repo name')
     release: str = Field(..., description='Release tag')
-    release_date: str = Field(..., description='Release date')
+    release_date: str | datetime = Field(..., description='Release date')
 
     @field_validator('release_date', mode='after')
     @classmethod
@@ -54,7 +54,7 @@ class NewReleasesSchema(BaseModel):
     repo_name: str = Field(..., description='repo name')
     repo_uri: str = Field(..., description='repo URI')
     release: str = Field(..., description='release number')
-    release_date: datetime = Field(..., description='release datetime')
+    release_date: str | datetime = Field(..., description='release datetime')
 
 
 class NewReleasesViewSchema(NewReleasesSchema):
@@ -67,7 +67,7 @@ class SubscriptionsByUserSchema(BaseModel):
     repo_name: str = Field(..., description='repo name')
     repo_uri: str = Field(..., description='repo URI')
     release: str = Field(..., description='release number')
-    release_date: datetime = Field(..., description='release datetime')
+    release_date: str | datetime = Field(..., description='release datetime')
 
     @field_validator('release_date', mode='after')
     @classmethod

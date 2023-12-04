@@ -1,7 +1,9 @@
 import logging
 import re
 import requests
+import json
 
+import emoji
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, BotCommand
 from telegram.ext import Application, ContextTypes, CommandHandler, MessageHandler, ConversationHandler
 from telegram.ext.filters import Regex
@@ -27,7 +29,9 @@ def create_bot():
         Точка входа в чат с ботом.
         Приветствие.
         """
-        text = 'Текст приветствия и описания работы бота'
+        text = f'''Привет, {update.message.from_user.username.title()}!\nМеня зовут Rchecker и я не человек.\n'''
+        text += 'Я могу отслжеивать обновления релизов интересных тебе библиотек Python, которые есть на GitHub.\n'
+        text += 'Просто следуй инструкциями и будь в курсе последних обновлений твоих любимых библиотек!'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
         await start_communication(update, context)
         ## TO DO ADD USER TO TABLE DATABASE
@@ -48,9 +52,12 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
+        text = f'Здесь ты можешь проверить наличие обновлений библиотек, нажав\n\U00002705 *Проверить новые релизы*.\n\n'
+        text += 'А если ты еще не подписался на обновления, то можешь сделать это в разделе\n\U00002705 *Управление моими подписками*.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="Выбери действие: КОРОТКОЕ ОПИСАНИЕ КАЖДОГО ДЕЙСТВИЯ",
-                                       reply_markup=reply_markup)
+                                       text=text,
+                                       reply_markup=reply_markup,
+                                       parse_mode='Markdown')
         send_user = {'user_id': update.message.from_user.id,
                      'username': update.message.from_user.username,
                      'first_name': update.message.from_user.first_name}
@@ -58,9 +65,31 @@ def create_bot():
         requests.post(uri, json=send_user)
         return 0
 
+    def get_releases(user):
+        uri = f'http://0.0.0.0:8880/get_releases/{user}'
+        response = requests.get(uri)
+        subscriptions_repos = 'Список обновленных релизов: \n{}'
+        if response.status_code == 200:
+            response_subscriptions = json.loads(response.text)
+            if response_subscriptions:
+                subscript = ''
+                for idx, repo in enumerate(response_subscriptions):
+                    if repo['user_id'] == user:
+                        subscript += f"{idx + 1}. [{repo['repo_name']}(by {repo['owner']})]({repo['repo_uri']}), релиз № {repo['release']} от {repo['release_date']} \n"
+            else:
+                subscript = 'Обновлений не обнаружено.\U0001F61E'
+        else:
+            subscript = 'Неизвестная ошибка чтения списка обновленных релизов.\U0001F47D'
+
+        subscriptions_repos = subscriptions_repos.format(subscript)
+        return subscriptions_repos
+
     async def check_releases(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        ## TO DO SELECT USER-RELEASE-RELEASE_NUMBER FROM TABLES AND CLEAR TABLE BY USER
-        await update.message.reply_text('Список обновленных релизов: СПИСОК ОБНОВЛЕННЫХ РЕЛИЗОВ')
+        subscriptions_repos = get_releases(update.message.from_user.id)
+
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=subscriptions_repos,
+                                       parse_mode='Markdown', disable_web_page_preview=True)
         await start_communication(update, context)
         return 0
 
@@ -86,20 +115,45 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
+        text = 'Краткое руководство по разделу\n'
+        text += '1. \U0001F4CB *Показать список подписок* - если нужно отобразить текущие подписки.\n'
+        text += '2. \U00002795 *Добавить подписки* - для добавления подписок (списком или поштучно).\n'
+        text += '3. \U00002796 *Удалить подписки* - для удаления всех или некоторых подписок.\n'
+        text += '4. \U0001F514 *Подписаться на уведомления* - если хочешь включить автоматические уведомления.\n'
+        text += '5. \U0001F515 *Отписаться от уведомлений* - если уведомления нужно отключить.\n'
+        text += '6. \U00002B05 *В начало* - вернуться в начало.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=f"Управление подписками: КОРОТКОЕ ОПИСАНИЕ МЕТОДОВ",
-                                       reply_markup=reply_markup)
+                                       text=text,
+                                       reply_markup=reply_markup, parse_mode='Markdown')
         return 1
 
-    async def list_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        ## TO DO SELECT USER-RELEASES FROM TABLE
-        user = update.message.from_user.id
+    def get_subscription(user):
         uri = f'http://0.0.0.0:8880/get_subscriptions/{user}'
         response = requests.get(uri)
-        print(response)
-        print(type(response))
 
-        await update.message.reply_text('Твой список подписок: СПИСОК ПОДПИСОК')
+        subscriptions_repos = 'Твой список подписок: \n{}'
+        repos = {}
+        if response.status_code == 200:
+            response_subscriptions = json.loads(response.text)
+            if response_subscriptions:
+                subscript = ''
+                for idx, repo in enumerate(response_subscriptions):
+                    if repo['user_id'] == user:
+                        subscript += f"{idx + 1}. [{repo['repo_name']}(by {repo['owner']})]({repo['repo_uri']}), релиз № {repo['release']} от {repo['release_date']} \n"
+                        repos[idx + 1] = [repo['owner'], repo['repo_name'], f"'{repo['repo_uri']}'"]
+            else:
+                subscript = 'Подписок не обнаружено.\U0001F61E'
+        else:
+            subscript = 'Неизвестная ошибка чтения списка подписок.\U0001F47D'
+
+        return subscriptions_repos.format(subscript), repos
+
+    async def list_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        subscriptions_repos, _ = get_subscription(update.message.from_user.id)
+
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=subscriptions_repos,
+                                       parse_mode='Markdown', disable_web_page_preview=True)
         await manage_subscription(update, context)
         return 1
 
@@ -116,8 +170,10 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
+        text = 'Выбери интересующий тебя нукт добавления подписок.\n'
+        text += 'Если уже знаешь, что делать - действуй.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=f"Добавление подписок: ОБЩАЯ ИНСТРУКЦИЯ ПО ДОБАВЛЕНИЮ",
+                                       text=text,
                                        reply_markup=reply_markup)
         return 3
 
@@ -134,8 +190,10 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
+        text = 'Выбери интересующий тебя нукт удаления подписок.\n'
+        text += 'Если уже знаешь, что делать - действуй.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=f"Удаление подписок: ОБЩАЯ ИНСТРУКЦИЯ ПО УДАЛЕНИЮ",
+                                       text=text,
                                        reply_markup=reply_markup)
         return 4
 
@@ -166,11 +224,19 @@ def create_bot():
         return 1
 
     async def add_one(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text('Инструкция по добавлению одной библиотеки')
+        text = 'Если хочешь добавить подписку на одну библиотеку - *добавить ссылку на нее* по следующему шаблону:\n'
+        text += '*https://gihub.com/OWNER/REPO_NAME*, где\n'
+        text += '*OWNER* - пользователь GitHub\n*REPO_NAME* - название репозитория пользователя\n'
+        text += '*ВАЖНО:*\U000026A0 репозиторий должен быть зарегистрирован как библиотека и иметь релиз. '
+        await update.message.reply_text(text, parse_mode='Markdown', disable_web_page_preview=True)
         return 3
 
     async def add_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text('Инструкция по добавлению списка библиотек')
+        text = 'Если хочешь добавить подписку на несколько библиотек - *добавить ссылки на них через запятую* по следующему шаблону:\n'
+        text += '*https://gihub.com/OWNER_1/REPO_NAME_1, https://gihub.com/OWNER_2/REPO_NAME_2*, где\n'
+        text += '*OWNER_N* - пользователь GitHub\n*REPO_NAME_N* - название репозитория соответствующего пользователя\n'
+        text += '*ВАЖНО:*\U000026A0 репозиторий должен быть зарегистрирован как библиотека и иметь релиз. '
+        await update.message.reply_text(text, parse_mode='Markdown', disable_web_page_preview=True)
         return 3
 
     async def add_repos(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -180,24 +246,24 @@ def create_bot():
             ## TO DO ADD REPO TO TABLE DATABASE REPOS AND SUBSCRIPTIONS AND NOTIFICATIONS
             libs.append((lib[1], lib[2]))
 
-        if len(parse_libs) == 0:
-            await update.message.reply_text('Не удалось определить путь до библиотеки')
-        elif len(parse_libs) == 1:
-            await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) добавлена в список отслеживания')
-        elif len(parse_libs) > 1:
-            multi_libs = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
-            await update.message.reply_text(f'Библиотеки {multi_libs} добавлены к отслеживанию')
-        await add_subscription(update, context)
-
         send_repos = {'user_id': update.message.from_user.id,
                       'repos': libs}
         uri = 'http://0.0.0.0:8880/add_repos'
-        requests.post(uri, json=send_repos)
+        response = requests.post(uri, json=send_repos)
+
+        if response.status_code == 201:
+            if len(parse_libs) == 0:
+                await update.message.reply_text('Не удалось определить путь до библиотеки\U0001F61E')
+            elif len(parse_libs) == 1:
+                await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) добавлена в список отслеживания\U0001F44C')
+            elif len(parse_libs) > 1:
+                multi_libs = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
+                await update.message.reply_text(f'Библиотеки {multi_libs} добавлены к отслеживанию\U0001F44C')
+            await add_subscription(update, context)
 
         return 3
 
     async def delete_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text('ВЫДАТЬ СПИСОК ПОДПИСОК')
         # await update.message.reply_text('ИНСТРУКЦИЯ ПО УДАЛЕНИЮ СПИСКА БИБЛИОТЕК ИЗ ОТСЛЕЖИВАНИЯ')
         keyboard = [
             [
@@ -210,27 +276,49 @@ def create_bot():
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text='ИНСТРУКЦИЯ ПО УДАЛЕНИЮ СПИСКА БИБЛИОТЕК ИЗ ОТСЛЕЖИВАНИЯ',
                                        reply_markup=reply_markup)
+        subscriptions_repos, _ = get_subscription(update.message.from_user.id)
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=subscriptions_repos,
+                                       parse_mode='Markdown', disable_web_page_preview=True)
+
         return 5
 
     async def delete_repos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        _, repos = get_subscription(update)
+
         parse_id_libs = re.findall(r'(\d)', update.message.text)
         libs = []
+        repos_uri = []
         for lib in parse_id_libs:
             ## TO DO SELECT OWNER AND REPO FROM TABLES AND DELETE FROM TABLE SUBSRIPTIONS
-            libs.append(lib[0])
-        if len(parse_id_libs) == 0:
-            await update.message.reply_text('Не удалось определить библиотеки для удаления из отслеживания')
-        elif len(parse_id_libs) == 1:
-            await update.message.reply_text(f'Библиотека {libs[0][0]}(by {libs[0][0]}) удалена из списка отслеживания')
-        elif len(parse_id_libs) > 1:
-            libs = ', '.join([f'{l[0]}(by {l[0]})' for l in libs])
-            await update.message.reply_text(f'Библиотеки {libs} удалены из списка отслеживания')
-        await delete_subscription(update, context)
+            libs.append(repos[int(lib)])
+            repos_uri.append(repos[int(lib)][2])
+
+        send_repos = {'user_id': update.message.from_user.id,
+                      'repos': repos_uri}
+        print(send_repos)
+        uri = 'http://0.0.0.0:8880/delete_subscriptions'
+        response = requests.post(uri, json=send_repos)
+
+        if response.status_code == 200:
+            if len(parse_id_libs) == 0:
+                await update.message.reply_text('Не удалось определить библиотеки для удаления из отслеживания')
+            elif len(parse_id_libs) == 1:
+                await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) удалена из списка отслеживания')
+            elif len(parse_id_libs) > 1:
+                deleted_repos = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
+                await update.message.reply_text(f'Библиотеки {deleted_repos} удалены из списка отслеживания')
+            await delete_subscription(update, context)
+
         return 4
 
     async def delete_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ## TO DO DELETE ALL REPOS FROM SUBSCRIPTIONS BY USER
         await update.message.reply_text('Список отслеживания очищен')
+        send_repos = {'user_id': update.message.from_user.id}
+        uri = 'http://0.0.0.0:8880/delete_all_subscriptions'
+        requests.post(uri, json=send_repos)
+
         await manage_subscription(update, context)
         return 1
 
