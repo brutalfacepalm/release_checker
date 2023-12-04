@@ -20,7 +20,8 @@ def create_bot():
         Добавляет пункты в меню чата с ботом.
         """
         command_info = [
-            BotCommand('start', 'чтобы начать диалог')
+            BotCommand('start', 'чтобы начать беседу'),
+            BotCommand('cancel', 'закончить эту беседу что бы начать такую же')
         ]
         await application.bot.set_my_commands(command_info)
 
@@ -29,9 +30,12 @@ def create_bot():
         Точка входа в чат с ботом.
         Приветствие.
         """
-        text = f'''Привет, {update.message.from_user.username.title()}!\nМеня зовут Rchecker и я не человек.\n'''
-        text += 'Я могу отслжеивать обновления релизов интересных тебе библиотек Python, которые есть на GitHub.\n'
-        text += 'Просто следуй инструкциями и будь в курсе последних обновлений твоих любимых библиотек!'
+
+        us_name = update.message.from_user.username if update.message.from_user.username \
+            else update.message.from_user.first_name if update.message.from_user.first_name else 'Stranger'
+        text = f'''Привет, {us_name}!\nМеня зовут Rchecker и я не человек.\n'''
+        text += 'Я могу отслеживать обновления релизов интересных тебе библиотек Python, которые есть на GitHub.\n'
+        text += 'Просто следуй инструкциям и будь в курсе последних обновлений твоих любимых библиотек!'
         await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
         await start_communication(update, context)
         ## TO DO ADD USER TO TABLE DATABASE
@@ -59,8 +63,8 @@ def create_bot():
                                        reply_markup=reply_markup,
                                        parse_mode='Markdown')
         send_user = {'user_id': update.message.from_user.id,
-                     'username': update.message.from_user.username,
-                     'first_name': update.message.from_user.first_name}
+                     'username': update.message.from_user.username if update.message.from_user.username else '',
+                     'first_name': update.message.from_user.first_name if update.message.from_user.first_name else ''}
         uri = 'http://0.0.0.0:8880/add_user'
         requests.post(uri, json=send_user)
         return 0
@@ -170,7 +174,7 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
-        text = 'Выбери интересующий тебя нукт добавления подписок.\n'
+        text = 'Выбери интересующий тебя пункт добавления подписок.\n'
         text += 'Если уже знаешь, что делать - действуй.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=text,
@@ -191,10 +195,12 @@ def create_bot():
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
         text = 'Выбери интересующий тебя нукт удаления подписок.\n'
-        text += 'Если уже знаешь, что делать - действуй.'
+        text += 'Если уже знаешь, что делать - действуй.\n'
+        text += '*ВАЖНО:*\U000026A0 Если нажмешь \U00002705*Удалить все*, то сразу удалятся все твои подписки. '
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=text,
-                                       reply_markup=reply_markup)
+                                       reply_markup=reply_markup,
+                                       parse_mode='Markdown')
         return 4
 
     async def set_time_notification(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -207,19 +213,19 @@ def create_bot():
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text=f"Установи время увдомлений: ОБЩАЯ ИНСТРУКЦИЯ ПО УСТАНОВКЕ УВЕДОМЛЕНИЙ",
+                                       text=f"РАЗДЕЛ В РАЗРАБОТКЕ\U0001F6E0",
                                        reply_markup=reply_markup)
         ## TO DO JOB SCHEDULE BY TIME
         return 6
 
     async def set_notification(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text('Уведомления установлены')
+        await update.message.reply_text('РАЗДЕЛ В РАЗРАБОТКЕ\U0001F6E0')
         await manage_subscription(update, context)
         return 1
 
     async def delete_notification(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ## TO DO CLEAR JOBS BY USER
-        await update.message.reply_text('Уведомления отключены')
+        await update.message.reply_text('РАЗДЕЛ В РАЗРАБОТКЕ\U0001F6E0')
         await manage_subscription(update, context)
         return 1
 
@@ -273,8 +279,9 @@ def create_bot():
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard,
                                            resize_keyboard=True)
+        text = 'Если хочешь удалить из списка подписки на некоторые библиотеки, просто укажи их номера через запятую.'
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text='ИНСТРУКЦИЯ ПО УДАЛЕНИЮ СПИСКА БИБЛИОТЕК ИЗ ОТСЛЕЖИВАНИЯ',
+                                       text=text,
                                        reply_markup=reply_markup)
         subscriptions_repos, _ = get_subscription(update.message.from_user.id)
         await context.bot.send_message(chat_id=update.effective_chat.id,
@@ -302,19 +309,19 @@ def create_bot():
 
         if response.status_code == 200:
             if len(parse_id_libs) == 0:
-                await update.message.reply_text('Не удалось определить библиотеки для удаления из отслеживания')
+                await update.message.reply_text('Не удалось определить библиотеки для удаления из отслеживания\U0001F44C')
             elif len(parse_id_libs) == 1:
-                await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) удалена из списка отслеживания')
+                await update.message.reply_text(f'Библиотека {libs[0][1]}(by {libs[0][0]}) удалена из списка отслеживания\U0001F44C')
             elif len(parse_id_libs) > 1:
                 deleted_repos = ', '.join([f'{l[1]}(by {l[0]})' for l in libs])
-                await update.message.reply_text(f'Библиотеки {deleted_repos} удалены из списка отслеживания')
+                await update.message.reply_text(f'Библиотеки {deleted_repos} удалены из списка отслеживания\U0001F44C')
             await delete_subscription(update, context)
 
         return 4
 
     async def delete_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ## TO DO DELETE ALL REPOS FROM SUBSCRIPTIONS BY USER
-        await update.message.reply_text('Список отслеживания очищен')
+        await update.message.reply_text('Список отслеживания очищен \U0001F44C')
         send_repos = {'user_id': update.message.from_user.id}
         uri = 'http://0.0.0.0:8880/delete_all_subscriptions'
         requests.post(uri, json=send_repos)

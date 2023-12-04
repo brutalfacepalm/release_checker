@@ -3,9 +3,9 @@ import uvicorn
 import click
 import asyncio
 from starlette import status
-from datetime import datetime
 import requests
 import json
+import schedule
 
 from typing import List, Dict
 from getlogger import get_logger
@@ -22,7 +22,7 @@ from schemas import (UsersSchema, UsersViewSchema,
 
 def create_app():
 
-    async def lifespan(app: FastAPI):
+    async def lifespan(_: FastAPI):
         async with app.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
             logger.info('Startup FastAPI')
@@ -40,37 +40,42 @@ def create_app():
     app.session_maker = session_maker
     logger.info('Application FastAPI was created')
 
-    async def check_releases(session):
-        token = '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'
-        select_all = await ReposQueryset.select_all(session)
-        for id_repo, uri, api_uri, owner, repo_name, release, release_date in select_all:
-            response = requests.get(api_uri,
-                                    headers={'Authorization': f'token:{token}',
-                                             'X-GitHub-Api-Version': '2022-11-28'})
-            response = json.loads(response.text)
-            new_release = response['tag_name']
-            new_release_date = response['created_at']
+    async def check_releases():
+        sm = app.session_maker
+        async with sm.begin() as session:
+            token = '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'
+            select_all = await ReposQueryset.select_all(session)
+            for id_repo, uri, api_uri, owner, repo_name, release, release_date in select_all:
+                response = requests.get(api_uri,
+                                        headers={'Authorization': f'token:{token}',
+                                                 'X-GitHub-Api-Version': '2022-11-28'})
+                response = json.loads(response.text)
+                new_release = response['tag_name']
+                new_release_date = response['created_at']
 
-            repo_to_load = {'uri': uri,
-                            'api_uri': api_uri,
-                            'owner': owner,
-                            'repo_name': repo_name,
-                            'release': new_release,
-                            'release_date': new_release_date}
+                repo_to_load = {'uri': uri,
+                                'api_uri': api_uri,
+                                'owner': owner,
+                                'repo_name': repo_name,
+                                'release': new_release,
+                                'release_date': new_release_date}
 
-            repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
-            repo_as_dict = repo_to_load_as_schema.model_dump()
+                repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
+                repo_as_dict = repo_to_load_as_schema.model_dump()
 
-            if release_date < repo_as_dict['release_date']:
-                await ReposQueryset.update(session, repo_as_dict)
-                await NotificationsQueryset.create(session, id_repo)
+                if release_date < repo_as_dict['release_date']:
+                    await ReposQueryset.update(session, repo_as_dict)
+                    await NotificationsQueryset.create(session, id_repo)
+
+    schedule.every().minute.do(check_releases)
 
     @app.get('/get_releases/{user}', response_model=List[SubscriptionsByUserSchema])
     async def get_releases(request: Request, user: int):
         sm = request.app.session_maker
         response = []
+
+        await check_releases()
         async with sm.begin() as session:
-            await check_releases(session)
 
             res = await NotificationsQueryset.get_repos_by_user(session, user)
             for by_repo in res:
