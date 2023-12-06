@@ -77,6 +77,18 @@ class Notifications(BaseModel):
     __tablename__ = "notifications"
     __table_args__ = {'comment': 'Таблица актуальных обновлений библиотек.'}
 
-    # id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
     user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
     repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')
+
+
+class NotificationJobs(BaseModel):
+    """
+
+    """
+    __tablename__ = "notificationjobs"
+    __table_args__ = {'comment': 'Таблица для рассылок подписанным юзерам.'}
+
+    user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
+    chat_id = Column(Integer(), nullable=False, primary_key=True, comment='ID чата')
+    hour = Column(Integer(), nullable=False, comment='Час уведомления')
+    minute = Column(Integer(), nullable=False, comment='Минута уведомления')

@@ -1,58 +1,58 @@
+import os
 from fastapi import FastAPI, Request
 import uvicorn
 import click
 import asyncio
 from starlette import status
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import json
-import schedule
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from typing import List, Dict
 from getlogger import get_logger
 from database import Base, engine
 from database import sm as session_maker
 from querysets import UsersQueryset, ReposQueryset, SubscriptionsQueryset, NotificationsQueryset
-from schemas import (UsersSchema, UsersViewSchema,
-                     ReposSchema, ReposViewSchema,
-                     SubscriptionsSchema, SubscriptionsViewSchema,
-                     NotificationsSchema, NotificationsViewSchema,
-                     NewReleasesSchema, NewReleasesViewSchema,
-                     SubscriptionsByUserSchema, SubscriptionsByUserViewSchema)
+from schemas import (UsersSchema, ReposSchema, SubscriptionsSchema, SubscriptionsByUserSchema)
 
 
-def create_app():
+def request_to_api_github(api_uri):
+    token = os.environ.get("GITHUB_API_TOKEN")
 
-    async def lifespan(_: FastAPI):
-        async with app.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-            logger.info('Startup FastAPI')
+    session = requests.Session()
+    retry = Retry(connect=10, backoff_factor=1)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
 
-        yield
+    new_release, new_release_date = None, None
+    try_ = 10
+    while try_:
+        response = session.get(api_uri,
+                               timeout=10,
+                               headers={'Accept': 'application/vnd.github+json',
+                                        'Authorization': f'Bearer {token}',
+                                        'X-GitHub-Api-Version': '2022-11-28'})
+        if response.status_code == 200:
+            response = json.loads(response.text)
+            new_release = response['tag_name']
+            new_release_date = response['created_at']
+            break
+        try_ -= 1
+    return new_release, new_release_date
 
-        await app.engine.dispose()
-        logger.info('Shutdown FastAPI')
 
-    logger = get_logger()
-    app = FastAPI(docs_url='/docs',
-                  debug=True,
-                  lifespan=lifespan)
-    app.engine = engine
-    app.session_maker = session_maker
-    logger.info('Application FastAPI was created')
+async def check_releases(app):
+    sm = app.session_maker
+    async with sm.begin() as session:
+        select_all = await ReposQueryset.select_all(session)
+        for id_repo, uri, api_uri, owner, repo_name, release, release_date in select_all:
 
-    async def check_releases():
-        sm = app.session_maker
-        async with sm.begin() as session:
-            token = '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'
-            select_all = await ReposQueryset.select_all(session)
-            for id_repo, uri, api_uri, owner, repo_name, release, release_date in select_all:
-                response = requests.get(api_uri,
-                                        headers={'Authorization': f'token:{token}',
-                                                 'X-GitHub-Api-Version': '2022-11-28'})
-                response = json.loads(response.text)
-                new_release = response['tag_name']
-                new_release_date = response['created_at']
+            new_release, new_release_date = request_to_api_github(api_uri)
 
+            if new_release and new_release_date:
                 repo_to_load = {'uri': uri,
                                 'api_uri': api_uri,
                                 'owner': owner,
@@ -67,14 +67,36 @@ def create_app():
                     await ReposQueryset.update(session, repo_as_dict)
                     await NotificationsQueryset.create(session, id_repo)
 
-    schedule.every().minute.do(check_releases)
+
+def create_app():
+    async def lifespan(_: FastAPI):
+        async with app.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        app.scheduler.start()
+        app.scheduler.add_job(check_releases, 'cron', day_of_week='mon-sun', hour=0, minute=0, args=[app])
+        logger.info('Startup FastAPI')
+
+        yield
+
+        await app.engine.dispose()
+        logger.info('Shutdown FastAPI')
+
+    logger = get_logger()
+    app = FastAPI(docs_url='/docs',
+                  debug=True,
+                  lifespan=lifespan)
+    app.engine = engine
+    app.session_maker = session_maker
+    app.scheduler = AsyncIOScheduler()
+
+    logger.info('Application FastAPI was created')
 
     @app.get('/get_releases/{user}', response_model=List[SubscriptionsByUserSchema])
     async def get_releases(request: Request, user: int):
         sm = request.app.session_maker
         response = []
 
-        await check_releases()
+        # await check_releases(request.app)
         async with sm.begin() as session:
 
             res = await NotificationsQueryset.get_repos_by_user(session, user)
@@ -116,7 +138,6 @@ def create_app():
     @app.post('/add_repos',
               status_code=status.HTTP_201_CREATED)
     async def add_repos(request: Request, data: Dict[str, int | List[List[str]]]):
-        token = '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'
         sm = request.app.session_maker
         user_id = data['user_id']
         subscriptions = {'user_id': user_id}
@@ -126,35 +147,30 @@ def create_app():
             uri = f'https://github.com/{owner}/{repo_name}'
             api_uri = f'https://api.github.com/repos/{owner}/{repo_name}/releases/latest'
 
-            response = requests.get(api_uri,
-                                    headers={'Authorization': f'token:{token}',
-                                             'X-GitHub-Api-Version': '2022-11-28'})
-            response = json.loads(response.text)
-            release = response['tag_name']
-            release_date = response['created_at']
+            release, release_date = request_to_api_github(api_uri)
+            if release and release_date:
+                repo_to_load = {'uri': uri,
+                                'api_uri': api_uri,
+                                'owner': owner,
+                                'repo_name': repo_name,
+                                'release': release,
+                                'release_date': release_date}
 
-            repo_to_load = {'uri': uri,
-                            'api_uri': api_uri,
-                            'owner': owner,
-                            'repo_name': repo_name,
-                            'release': release,
-                            'release_date': release_date}
-
-            async with sm.begin() as session:
-                repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
-                repo_as_dict = repo_to_load_as_schema.model_dump()
-                id_repo, is_created, is_update = await ReposQueryset.create(session, repo_as_dict)
-
-            if is_update:
                 async with sm.begin() as session:
-                    await ReposQueryset.update(session, repo_as_dict)
-                    await NotificationsQueryset.create(session, id_repo)
+                    repo_to_load_as_schema = ReposSchema.model_validate(repo_to_load)
+                    repo_as_dict = repo_to_load_as_schema.model_dump()
+                    id_repo, is_created, is_update = await ReposQueryset.create(session, repo_as_dict)
 
-            subscriptions['repo_id'] = id_repo
-            async with sm.begin() as session:
-                subscriptions_to_load_as_schema = SubscriptionsSchema.model_validate(subscriptions)
-                subscriptions_as_dict = subscriptions_to_load_as_schema.model_dump()
-                await SubscriptionsQueryset.create(session, subscriptions_as_dict)
+                if is_update:
+                    async with sm.begin() as session:
+                        await ReposQueryset.update(session, repo_as_dict)
+                        await NotificationsQueryset.create(session, id_repo)
+
+                subscriptions['repo_id'] = id_repo
+                async with sm.begin() as session:
+                    subscriptions_to_load_as_schema = SubscriptionsSchema.model_validate(subscriptions)
+                    subscriptions_as_dict = subscriptions_to_load_as_schema.model_dump()
+                    await SubscriptionsQueryset.create(session, subscriptions_as_dict)
 
     @app.post('/delete_subscriptions',
               status_code=status.HTTP_200_OK)

@@ -1,6 +1,6 @@
 from sqlalchemy import select, update, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import Users, Repos, Subscriptions, Notifications
+from models import Users, Repos, Subscriptions, Notifications, NotificationJobs
 
 
 class UsersQueryset:
@@ -108,4 +108,24 @@ class NotificationsQueryset:
     async def delete_by_user_and_repos(cls, session, user, repos):
         query = text(f"""DELETE FROM notifications AS n WHERE n.user_id={user} 
         AND n.repo_id IN (SELECT r.id FROM repos AS r WHERE r.uri IN ({', '.join(repos)}));""")
+        await session.execute(query)
+
+
+class NotificationJobsQueryset:
+    model = NotificationJobs
+
+    @classmethod
+    async def create(cls, session: AsyncSession, user, chat_id, hour, minute):
+        query = text(f"""INSERT INTO notificationjobs (user_id, chat_id, hour, minute) VALUES ({user}, {chat_id}, {hour}, {minute});""")
+        await session.execute(query)
+
+    @classmethod
+    async def select(cls, session: AsyncSession):
+        query = text(f"""SELECT * FROM notificationjobs;""")
+        jobs = await session.execute(query)
+        return jobs
+
+    @classmethod
+    async def delete(cls, session: AsyncSession, user):
+        query = text(f"""DELETE FROM notificationjobs WHERE user_id={user};""")
         await session.execute(query)

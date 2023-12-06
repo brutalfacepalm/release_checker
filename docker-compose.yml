@@ -33,38 +33,38 @@ services:
     networks:
       fastapi:
 
-#  fastapi:
-#    build:
-#      context: ./services/fastapi
-#      dockerfile: ./Dockerfile
-#    container_name: fastapi
-#    command: python app.py
-#    env_file:
-#      .env.dev
-#    volumes:
-#      - ./services/fastapi:/fastapi
-#    ports:
-#      - "8880:8880"
-#    depends_on:
-#      - database
-#    networks:
-#      fastapi:
+  fastapi:
+    build:
+      context: ./services/fastapi
+      dockerfile: ./Dockerfile
+    container_name: fastapi
+    command: python app.py
+    env_file:
+      .env.dev
+    volumes:
+      - ./services/fastapi:/fastapi
+    ports:
+      - "8880:8880"
+    depends_on:
+      - database
+    networks:
+      fastapi:
 
-#  telegram_bot:
-#    build:
-#      context: ./services/fastapi
-#      dockerfile: ./Dockerfile
-#    restart: always
-#    container_name: telegram_bot
-#    command: python bot.py
-#    env_file:
-#      .env.dev
-#    volumes:
-#      - ./services/fastapi:/fastapi
-#    depends_on:
-#      - database
-#    networks:
-#      fastapi:
+  telegram_bot:
+    build:
+      context: ./services/fastapi
+      dockerfile: ./Dockerfile
+    restart: always
+    container_name: telegram_bot
+    command: python bot.py
+    env_file:
+      .env.dev
+    volumes:
+      - ./services/fastapi:/fastapi
+    depends_on:
+      - database
+    networks:
+      fastapi:
 
 networks:
   fastapi:
