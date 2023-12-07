@@ -96,7 +96,6 @@ def create_app():
         sm = request.app.session_maker
         response = []
 
-        # await check_releases(request.app)
         async with sm.begin() as session:
 
             res = await NotificationsQueryset.get_repos_by_user(session, user)

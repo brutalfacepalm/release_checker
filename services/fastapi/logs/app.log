@@ -1,53 +1,49 @@
-2023-12-04 22:09:08,698 — logger — INFO — Shutdown FastAPI
-2023-12-04 22:09:09,301 — logger — INFO — Application FastAPI was created
-2023-12-04 22:09:09,340 — logger — INFO — Startup FastAPI
-2023-12-04 22:09:32,607 — logger — INFO — Shutdown FastAPI
-2023-12-04 22:09:33,219 — logger — INFO — Application FastAPI was created
-2023-12-04 22:09:33,261 — logger — INFO — Startup FastAPI
-2023-12-04 23:51:19,750 — logger — INFO — Shutdown FastAPI
-2023-12-04 23:51:20,588 — logger — INFO — Application FastAPI was created
-2023-12-04 23:51:20,631 — logger — INFO — Startup FastAPI
-2023-12-04 23:51:46,502 — logger — INFO — Shutdown FastAPI
-2023-12-04 23:51:47,365 — logger — INFO — Application FastAPI was created
-2023-12-04 23:51:47,409 — logger — INFO — Startup FastAPI
-2023-12-04 23:51:55,436 — logger — INFO — Shutdown FastAPI
-2023-12-04 23:51:56,205 — logger — INFO — Application FastAPI was created
-2023-12-04 23:51:56,258 — logger — INFO — Startup FastAPI
-2023-12-05 00:00:16,484 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:00:17,215 — logger — INFO — Application FastAPI was created
-2023-12-05 00:00:17,292 — logger — INFO — Startup FastAPI
-2023-12-05 00:10:41,946 — logger — INFO — Application FastAPI was created
-2023-12-05 00:10:41,987 — logger — INFO — Startup FastAPI
-2023-12-05 00:21:20,919 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:23:03,397 — logger — INFO — Application FastAPI was created
-2023-12-05 00:23:03,439 — logger — INFO — Startup FastAPI
-2023-12-05 00:23:14,575 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:23:19,135 — logger — INFO — Application FastAPI was created
-2023-12-05 00:23:19,176 — logger — INFO — Startup FastAPI
-2023-12-05 00:25:37,636 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:41:59,560 — logger — INFO — Application FastAPI was created
-2023-12-05 00:41:59,603 — logger — INFO — Startup FastAPI
-2023-12-05 00:52:34,268 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:52:35,105 — logger — INFO — Application FastAPI was created
-2023-12-05 00:52:35,147 — logger — INFO — Startup FastAPI
-2023-12-05 00:53:43,249 — logger — INFO — Application FastAPI was created
-2023-12-05 00:53:43,292 — logger — INFO — Startup FastAPI
-2023-12-05 00:54:46,639 — logger — INFO — Application FastAPI was created
-2023-12-05 00:54:46,685 — logger — INFO — Startup FastAPI
-2023-12-05 00:55:08,545 — logger — INFO — Application FastAPI was created
-2023-12-05 00:55:08,588 — logger — INFO — Startup FastAPI
-2023-12-05 00:57:17,454 — logger — INFO — Application FastAPI was created
-2023-12-05 00:57:17,512 — logger — INFO — Startup FastAPI
-2023-12-05 00:57:51,398 — logger — INFO — Application FastAPI was created
-2023-12-05 00:57:51,444 — logger — INFO — Startup FastAPI
-2023-12-05 00:57:59,109 — logger — INFO — Application FastAPI was created
-2023-12-05 00:57:59,154 — logger — INFO — Startup FastAPI
-2023-12-05 00:58:06,682 — logger — INFO — Shutdown FastAPI
-2023-12-05 00:58:19,344 — logger — INFO — Application FastAPI was created
-2023-12-05 00:58:19,387 — logger — INFO — Startup FastAPI
-2023-12-05 01:05:29,309 — logger — INFO — Shutdown FastAPI
-2023-12-05 01:05:30,003 — logger — INFO — Application FastAPI was created
-2023-12-05 01:05:30,083 — logger — INFO — Startup FastAPI
-2023-12-05 01:08:13,071 — logger — INFO — Shutdown FastAPI
-2023-12-05 01:08:13,867 — logger — INFO — Application FastAPI was created
-2023-12-05 01:08:13,912 — logger — INFO — Startup FastAPI
+2023-12-07 13:49:37,942 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:49:41,628 — logger — INFO — Application FastAPI was created
+2023-12-07 13:49:41,681 — logger — INFO — Startup FastAPI
+2023-12-07 13:50:15,088 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:50:18,354 — logger — INFO — Application FastAPI was created
+2023-12-07 13:50:18,406 — logger — INFO — Startup FastAPI
+2023-12-07 13:51:46,839 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:51:52,695 — logger — INFO — Application FastAPI was created
+2023-12-07 13:51:52,769 — logger — INFO — Startup FastAPI
+2023-12-07 13:51:59,793 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:52:04,283 — logger — INFO — Application FastAPI was created
+2023-12-07 13:52:04,334 — logger — INFO — Startup FastAPI
+2023-12-07 13:52:23,101 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:52:28,822 — logger — INFO — Application FastAPI was created
+2023-12-07 13:52:28,877 — logger — INFO — Startup FastAPI
+2023-12-07 13:52:48,743 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:52:53,211 — logger — INFO — Application FastAPI was created
+2023-12-07 13:52:53,265 — logger — INFO — Startup FastAPI
+2023-12-07 13:53:34,615 — logger — INFO — Shutdown FastAPI
+2023-12-07 13:53:42,587 — logger — INFO — Application FastAPI was created
+2023-12-07 13:53:42,640 — logger — INFO — Startup FastAPI
+2023-12-07 14:14:29,868 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:14:35,530 — logger — INFO — Application FastAPI was created
+2023-12-07 14:14:35,579 — logger — INFO — Startup FastAPI
+2023-12-07 14:15:26,962 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:15:32,006 — logger — INFO — Application FastAPI was created
+2023-12-07 14:15:32,063 — logger — INFO — Startup FastAPI
+2023-12-07 14:15:55,547 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:16:04,439 — logger — INFO — Application FastAPI was created
+2023-12-07 14:16:04,500 — logger — INFO — Startup FastAPI
+2023-12-07 14:16:08,213 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:38:20,840 — logger — INFO — Application FastAPI was created
+2023-12-07 14:39:11,780 — logger — INFO — Application FastAPI was created
+2023-12-07 14:39:11,835 — logger — INFO — Startup FastAPI
+2023-12-07 14:50:33,366 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:50:43,566 — logger — INFO — Application FastAPI was created
+2023-12-07 14:50:43,619 — logger — INFO — Startup FastAPI
+2023-12-07 14:52:18,498 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:52:22,034 — logger — INFO — Application FastAPI was created
+2023-12-07 14:52:22,084 — logger — INFO — Startup FastAPI
+2023-12-07 14:54:08,622 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:54:13,987 — logger — INFO — Application FastAPI was created
+2023-12-07 14:54:14,042 — logger — INFO — Startup FastAPI
+2023-12-07 14:57:02,705 — logger — INFO — Shutdown FastAPI
+2023-12-07 14:57:12,175 — logger — INFO — Application FastAPI was created
+2023-12-07 14:57:12,227 — logger — INFO — Startup FastAPI
+2023-12-07 15:02:34,913 — logger — INFO — Shutdown FastAPI
+2023-12-07 15:02:39,063 — logger — INFO — Application FastAPI was created
+2023-12-07 15:02:39,115 — logger — INFO — Startup FastAPI
