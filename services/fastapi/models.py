@@ -1,16 +1,17 @@
+"""
+Declare tables to database from class of model.
+"""
 from datetime import datetime as dt
 from sqlalchemy import Column, BigInteger, Text, DateTime, Integer
 from sqlalchemy.orm.collections import InstrumentedList
-from sqlalchemy import func
 from database import Base
 
 
 class BaseModel(Base):
     """
-
+    Base model as parent for another models.
     """
     __abstract__ = True
-    # id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
 
     def to_dict(self):
         """
@@ -32,24 +33,26 @@ class BaseModel(Base):
 
 class Users(BaseModel):
     """
-
+    Declare Users table
     """
     __tablename__ = "users"
     __table_args__ = {'comment': 'Таблица пользователей.'}
 
-    user_id = Column(BigInteger(), primary_key=True, nullable=False, comment='ID пользователя Telegram')
+    user_id = Column(BigInteger(), primary_key=True, nullable=False,
+                     comment='ID пользователя Telegram')
     username = Column(Text(), nullable=False, comment='Никнейм пользователя')
     first_name = Column(Text(), nullable=False, comment='Имя пользователя')
 
 
 class Repos(BaseModel):
     """
-
+    Declare Repos table
     """
     __tablename__ = "repos"
     __table_args__ = {'comment': 'Таблица отслеживаемых библиотек.'}
 
-    id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
+    id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True,
+                comment='ID в базе данных')
     uri = Column(Text(), nullable=False, primary_key=True, comment='Ссылка на репозиторий')
     api_uri = Column(Text(), nullable=False, comment='Ссылка на репозиторий')
     owner = Column(Text(), nullable=False, comment='Владелец репозитория')
@@ -60,19 +63,18 @@ class Repos(BaseModel):
 
 class Subscriptions(BaseModel):
     """
-
+    Declare Subscriptions table
     """
     __tablename__ = "subscriptions"
     __table_args__ = {'comment': 'Таблица подписок.'}
 
-    # id = Column(Integer(), nullable=False, autoincrement=True, primary_key=True, comment='ID в базе данных')
     user_id = Column(Integer(), nullable=False, primary_key=True, comment='ID пользователя')
     repo_id = Column(Integer(), nullable=False, primary_key=True, comment='ID репозитория')
 
 
 class Notifications(BaseModel):
     """
-
+    Declare Notifications table.
     """
     __tablename__ = "notifications"
     __table_args__ = {'comment': 'Таблица актуальных обновлений библиотек.'}
@@ -83,7 +85,7 @@ class Notifications(BaseModel):
 
 class NotificationJobs(BaseModel):
     """
-
+    Declare NotificationJobs table.
     """
     __tablename__ = "notificationjobs"
     __table_args__ = {'comment': 'Таблица для рассылок подписанным юзерам.'}
