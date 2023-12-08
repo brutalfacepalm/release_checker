@@ -1,3 +1,47 @@
 2023-12-07 18:09:54,709 — logger — INFO — Success create bitcoin(by bitcoin) in table Repos.
 2023-12-07 18:09:55,919 — logger — INFO — Success parse release info by api_uri: https://api.github.com/repos/node-real/bsc-erigon/releases/latest
 2023-12-07 18:09:55,923 — logger — INFO — Success create bsc-erigon(by node-real) in table Repos.
+2023-12-08 11:38:18,413 — logger — INFO — Application FastAPI was created.
+2023-12-08 11:38:18,464 — logger — INFO — Success connect to database and create tables.
+2023-12-08 11:38:18,469 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 11:38:18,469 — logger — INFO — Startup FastAPI.
+2023-12-08 12:20:27,791 — logger — INFO — Shutdown FastAPI.
+2023-12-08 12:20:32,296 — logger — INFO — Application FastAPI was created.
+2023-12-08 12:20:32,347 — logger — INFO — Success connect to database and create tables.
+2023-12-08 12:20:32,350 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 12:20:32,350 — logger — INFO — Startup FastAPI.
+2023-12-08 12:21:15,186 — logger — INFO — User create to database success: 433177964
+2023-12-08 12:21:17,507 — logger — INFO — Correct response new releases for user_id: 433177964
+2023-12-08 12:21:36,016 — logger — INFO — Correct response subscriptions for user_id: 433177964
+2023-12-08 12:22:48,967 — logger — INFO — Shutdown FastAPI.
+2023-12-08 12:23:15,271 — logger — INFO — Application FastAPI was created.
+2023-12-08 12:23:15,318 — logger — INFO — Success connect to database and create tables.
+2023-12-08 12:23:15,321 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 12:23:15,321 — logger — INFO — Startup FastAPI.
+2023-12-08 12:23:21,913 — logger — INFO — User create to database success: 433177964
+2023-12-08 12:25:32,474 — logger — INFO — Shutdown FastAPI.
+2023-12-08 12:25:44,583 — logger — INFO — Application FastAPI was created.
+2023-12-08 12:25:44,635 — logger — INFO — Success connect to database and create tables.
+2023-12-08 12:25:44,638 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 12:25:44,638 — logger — INFO — Startup FastAPI.
+2023-12-08 12:26:01,488 — logger — INFO — User create to database success: 433177964
+2023-12-08 12:26:45,110 — logger — INFO — Correct response subscriptions for user_id: 433177964
+2023-12-08 12:26:50,476 — logger — INFO — Correct response subscriptions for user_id: 433177964
+2023-12-08 12:26:50,485 — logger — INFO — Success delete subscriptions(amount 2) for user_id 433177964.
+2023-12-08 12:27:09,056 — logger — INFO — Success parse release info by api_uri: https://api.github.com/repos/bitcoin/bitcoin/releases/latest
+2023-12-08 12:27:09,063 — logger — INFO — Success create bitcoin(by bitcoin) in table Repos.
+2023-12-08 12:27:10,013 — logger — INFO — Success parse release info by api_uri: https://api.github.com/repos/node-real/bsc-erigon/releases/latest
+2023-12-08 12:27:10,018 — logger — INFO — Success create bsc-erigon(by node-real) in table Repos.
+2023-12-08 12:39:40,549 — logger — INFO — Shutdown FastAPI.
+2023-12-08 12:39:49,315 — logger — INFO — Application FastAPI was created.
+2023-12-08 12:39:49,381 — logger — INFO — Success connect to database and create tables.
+2023-12-08 12:39:49,384 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 12:39:49,384 — logger — INFO — Startup FastAPI.
+2023-12-08 12:39:58,917 — logger — INFO — User create to database success: 433177964
+2023-12-08 12:40:04,475 — logger — INFO — User create to database success: 433177964
+2023-12-08 12:41:09,430 — logger — INFO — Shutdown FastAPI.
+2023-12-08 12:41:14,794 — logger — INFO — Application FastAPI was created.
+2023-12-08 12:41:14,850 — logger — INFO — Success connect to database and create tables.
+2023-12-08 12:41:14,854 — logger — INFO — Success create Job of parsing releases.
+2023-12-08 12:41:14,854 — logger — INFO — Startup FastAPI.
+2023-12-08 12:41:25,210 — logger — INFO — User create to database success: 433177964
